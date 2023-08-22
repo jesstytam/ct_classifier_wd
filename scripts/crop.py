@@ -1,44 +1,30 @@
-from pycocotools.coco import COCO
+import json
 from PIL import Image
-import os
 
-def get_crop(dataset):
-    
-    # Path to your COCO annotations file and image directory
+def crop_image_to_bbox(dataset):
+
     coco_annotation_file = '/home/jess2/ct_classifier_wd/data/processed/' + dataset + '_coco.json'
-    image_directory = '/home/jess2/data/wild_deserts/Beyond the Fence- Tagged/images'
+    coco = json.load(open(coco_annotation_file))
 
-    # get species list
-    species = []
-    for species in coco_train['categories']:
-        category = speices['name']
-        species.append(category)
+    for annotation in coco['annotations']:
 
-    # Initialize COCO instance
-    coco = COCO(coco_annotation_file)
+        x = annotation['bbox'][0]
+        y = annotation['bbox'][1]
+        w = annotation['bbox'][2]
+        h = annotation['bbox'][3]
 
-    # Get all category IDs you're interested in (e.g., person, car, etc.)
-    for id in species:
-        category_ids = coco.getCatIds(catNms=[id])  # Replace 'person' with your desired category
+        box = (x, y, x+w, y+h)
 
-    # Loop through images and annotations
-    for img_id in coco.getImgIds():
-        img_info = coco.loadImgs(img_id)[0]
-        ann_ids = coco.getAnnIds(imgIds=img_info['id'], catIds=category_ids)
-        anns = coco.loadAnns(ann_ids)
-        
-        # Load the image
-        image_path = os.path.join(image_directory, img_info['file_name'])
-        image = Image.open(image_path)
+        image_path = ''+ annotation['image_id'].replace('_', ' ')
+        image_path_updated = image_path.replace(' ', '/', 1)
+        outpath = '/home/jess2/data/wild_deserts/processed/crops'
 
-        # Crop and save individual objects based on annotations
-        for ann in anns:
-            bbox = ann['bbox']
-            x, y, width, height = map(int, bbox)
-            object_image = image.crop((x, y, x + width, y + height))
-            
-            # Save the cropped object image
-            save_path = f'/home/jess2/data/wild_deserts/processed/crops/train/{img_info["file_name"]}_object_{ann["id"]}.jpg'
-            object_image.save(save_path)
+        img = Image.open(image_path_updated)
+        img2 = img.crop(box)
+        img2.save(outpath)
 
-    print("Cropping completed.")
+    print('Cropping done for ' + dataset ' images.')
+
+crop_image_to_bbox('train')
+crop_image_to_bbox('val')
+crop_image_to_bbox('test')
