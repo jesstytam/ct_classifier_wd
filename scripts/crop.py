@@ -24,9 +24,31 @@ def crop_image_to_bbox(dataset):
 
             img = Image.open(os.path.join('/home/jess/data/wild_deserts/Beyond the Fence- Tagged/images/' + image_path_updated + '.JPG'))
             img2 = img.crop(box)
-            img2.save(outpath + annotation['image_id'] + '.JPG')
+            img2_path = outpath + annotation['image_id'] + '.JPG'
+            img2.save(img2_path)
+            
+            print(img2_path, 'saved!')
 
-            print(outpath + annotation['image_id'] + '.JPG saved!')
+            #get label
+            # image_url = '/home/jess/ct_classifier_wd/data/processed/train_coco.json'
+            # input_json = json.load(open(image_url))
+
+            dict = {}
+
+            # for cropped_image in os.listdir('/home/jess/data/wild_deserts/processed/crops/' + dataset):
+            im = Image.open(img2_path)
+            width, height = im.size
+
+            # initialise dictionary
+            new_dict = {
+                "image_name":cropped_image_path,
+                "image_details":{
+                    "format":"jpg",
+                    "width":width,
+                    "height":height
+                },
+                "label":"class_name",
+            }
 
         except FileNotFoundError:
             pass
