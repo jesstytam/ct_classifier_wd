@@ -2,87 +2,77 @@ import json
 from PIL import Image
 import os
 
-labels_list = {
-                1: {'label': 'Red Kangaroo'},
-                2: {'label': 'Kangaroo'},
-                3: {'label': 'Dingo'},
-                4: {'label': 'Rabbit'},
-                5: {'label': 'Cat'},
-                6: {'label': 'Emu'},
-                7: {'label': 'Bird'},
-                8: {'label': 'Pig'},
-                9: {'label': 'Euro'},
-                10: {'label': 'Fox'},
-                11: {'label': 'Echidna'},
-                12: {'label': 'Western Grey Kangaroo'},
-                13: {'label': 'Small mammal'},
-                14: {'label': 'Other'},
-                15: {'label': 'Goat'}
-            }
-
 def crop_image_to_bbox(dataset):
+
+    labels_list = {
+        0: {'label': 'Red Kangaroo'},
+        1: {'label': 'Kangaroo'},
+        2: {'label': 'Dingo'},
+        3: {'label': 'Rabbit'},
+        4: {'label': 'Cat'},
+        5: {'label': 'Emu'},
+        6: {'label': 'Bird'},
+        7: {'label': 'Pig'},
+        8: {'label': 'Euro'},
+        9: {'label': 'Fox'},
+        10: {'label': 'Echidna'},
+        11: {'label': 'Western Grey Kangaroo'},
+        12: {'label': 'Small mammal'},
+        13: {'label': 'Other'},
+        14: {'label': 'Goat'}
+    }
 
     coco_annotation_file = '/home/jess/ct_classifier_wd/data/processed/' + dataset + '_coco.json'
     coco = json.load(open(coco_annotation_file))
 
     for annotation in coco['annotations']:
 
-        try: 
+        for species in labels_list:
+            crops_path = '/home/jess/data/wild_deserts/processed/crops'
+            sp = str(labels_list[species].values()).split("'")[1]
+            save_path = os.path.join(crops_path, sp)
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
 
-            # crop the images
-            bbox = annotation['bbox']
-            x = bbox[0]
-            y = bbox[1]
-            w = bbox[2]
-            h = bbox[3]
+            if annotation['category_id']==species:
 
-            box = (x, y, x+w, y+h)
+                try: 
 
-            image_path = ''+ annotation['image_id'].replace('_', ' ', 4)
-            image_path_updated = image_path.replace(' ', '/', 1)
-            outpath = '/home/jess/data/wild_deserts/processed/crops/' + dataset + '/'
+                    # crop the images
+                    bbox = annotation['bbox']
+                    x = bbox[0]
+                    y = bbox[1]
+                    w = bbox[2]
+                    h = bbox[3]
 
-            img = Image.open(os.path.join('/home/jess/data/wild_deserts/Beyond the Fence- Tagged/images/' + image_path_updated + '.JPG'))
-            img2 = img.crop(box)
-            img2_path = outpath + annotation['image_id'] + '.JPG'
-            img2.save(img2_path)
-            
-            print(img2_path, 'saved!')
+                    box = (x, y, x+w, y+h)
 
-            # create lists & dictionaries
-            # label list for the second part of the json
-            all_labels = []
-            for item in labels_list:
-                species = item['label']
-                all_labels.append(species)
-            labels = {'labels': [all_labels]}
-            
-            # get image classes & create the new coco object
-            img2_list = []
-            image_label = annotation['category_id']
-            for label in labels_list:
-                category_id = annotation['category_id']+1
-                if category_id == label.keys():
-                    image_label = label
-                    img_list = {'image_path': img2_path,
-                                'image_label':image_label}
-                    img2_list.append(img_list)
-                else:
+                    image_path = annotation['image_id'].replace('_', ' ', 4)
+                    image_path_updated = image_path.replace(' ', '/', 1)
+
+                    img = Image.open(os.path.join('/home/jess/data/wild_deserts/Beyond the Fence- Tagged/images/' + image_path_updated + '.JPG'))
+                    img2 = img.crop(box)
+
+                    # Define a counter for filename uniqueness
+                    counter = 0
+
+                    # Generate a filename and check for uniqueness
+                    while True:
+                        img2_path = os.path.join(save_path, f"{annotation['image_id']}_{counter}.JPG")
+                        if not os.path.exists(img2_path):
+                            break
+                        counter += 1
+                    
+                    img2.save(img2_path)
+                    print(img2_path, 'saved!')
+
+                except FileNotFoundError:
                     pass
 
-            # save the coco file
-            coco_outpath = '/home/jess/ct_classifier_wd/data/processed/' + dataset + '_classifier.json'
-            with open(coco_outpath, 'w') as file:
-                for line in img2_list:
-                    file.dump(line+'\n')
-                for line in all_labels:
-                    file.dump(line+'\n')
+            print('Images for ', sp, ' saved!')
 
-        except FileNotFoundError:
-            pass
-
-    print('Cropping done for ' + dataset + ' images.')
+        print(dataset, ' images processing done!')
 
 crop_image_to_bbox('train')
-# crop_image_to_bbox('val')
-# crop_image_to_bbox('test')
+crop_image_to_bbox('val')
+crop_image_to_bbox('test')
