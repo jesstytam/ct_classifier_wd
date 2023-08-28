@@ -2,6 +2,24 @@ import json
 from PIL import Image
 import os
 
+labels_list = {
+                1: {'label': 'Red Kangaroo'},
+                2: {'label': 'Kangaroo'},
+                3: {'label': 'Dingo'},
+                4: {'label': 'Rabbit'},
+                5: {'label': 'Cat'},
+                6: {'label': 'Emu'},
+                7: {'label': 'Bird'},
+                8: {'label': 'Pig'},
+                9: {'label': 'Euro'},
+                10: {'label': 'Fox'},
+                11: {'label': 'Echidna'},
+                12: {'label': 'Western Grey Kangaroo'},
+                13: {'label': 'Small mammal'},
+                14: {'label': 'Other'},
+                15: {'label': 'Goat'}
+            }
+
 def crop_image_to_bbox(dataset):
 
     coco_annotation_file = '/home/jess/ct_classifier_wd/data/processed/' + dataset + '_coco.json'
@@ -10,6 +28,8 @@ def crop_image_to_bbox(dataset):
     for annotation in coco['annotations']:
 
         try: 
+
+            # crop the images
             bbox = annotation['bbox']
             x = bbox[0]
             y = bbox[1]
@@ -29,26 +49,34 @@ def crop_image_to_bbox(dataset):
             
             print(img2_path, 'saved!')
 
-            #get label
-            # image_url = '/home/jess/ct_classifier_wd/data/processed/train_coco.json'
-            # input_json = json.load(open(image_url))
+            # create lists & dictionaries
+            # label list for the second part of the json
+            all_labels = []
+            for item in labels_list:
+                species = item['label']
+                all_labels.append(species)
+            labels = {'labels': [all_labels]}
+            
+            # get image classes & create the new coco object
+            img2_list = []
+            image_label = annotation['category_id']
+            for label in labels_list:
+                category_id = annotation['category_id']+1
+                if category_id == label.keys():
+                    image_label = label
+                    img_list = {'image_path': img2_path,
+                                'image_label':image_label}
+                    img2_list.append(img_list)
+                else:
+                    pass
 
-            dict = {}
-
-            # for cropped_image in os.listdir('/home/jess/data/wild_deserts/processed/crops/' + dataset):
-            im = Image.open(img2_path)
-            width, height = im.size
-
-            # initialise dictionary
-            new_dict = {
-                "image_name":cropped_image_path,
-                "image_details":{
-                    "format":"jpg",
-                    "width":width,
-                    "height":height
-                },
-                "label":"class_name",
-            }
+            # save the coco file
+            coco_outpath = '/home/jess/ct_classifier_wd/data/processed/' + dataset + '_classifier.json'
+            with open(coco_outpath, 'w') as file:
+                for line in img2_list:
+                    file.dump(line+'\n')
+                for line in all_labels:
+                    file.dump(line+'\n')
 
         except FileNotFoundError:
             pass
@@ -56,5 +84,5 @@ def crop_image_to_bbox(dataset):
     print('Cropping done for ' + dataset + ' images.')
 
 crop_image_to_bbox('train')
-crop_image_to_bbox('val')
-crop_image_to_bbox('test')
+# crop_image_to_bbox('val')
+# crop_image_to_bbox('test')
