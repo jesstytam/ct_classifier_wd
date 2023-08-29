@@ -32,6 +32,26 @@ def crop_image_to_bbox():
         "annotations": []
     }
 
+    categories = {
+        'id': 0, 'name': 'Red Kangaroo',
+        'id': 1, 'name': 'Kangaroo',
+        'id': 2, 'name': 'Dingo',
+        'id': 3, 'name': 'Rabbit',
+        'id': 4, 'name': 'Cat',
+        'id': 5, 'name': 'Emu',
+        'id': 6, 'name': 'Bird',
+        'id': 7, 'name': 'Pig',
+        'id': 8, 'name': 'Euro',
+        'id': 9, 'name': 'Fox',
+        'id': 10, 'name': 'Echidna',
+        'id': 11, 'name': 'Western Grey Kangaroo',
+        'id': 12, 'name': 'Small mammal',
+        'id': 13, 'name': 'Other',
+        'id': 14, 'name': 'Goat'
+    }
+    
+    cls_coco['categories'].append(categories)
+
     for annotation in coco['annotations']:
 
         for species in labels_list:
@@ -81,14 +101,14 @@ def crop_image_to_bbox():
                 im = Image.open(img2_path)
                 width, height = im.size
 
-                cls_coco["images"].append({
+                img = {
                     "file_name": f'{sp}/{Path(img2_path).name}',
                     "height": height,
                     "width": width,
                     "id": annotation['image_id']
-                })
+                }
+                cls_coco['images'].append(img)
 
-                # Create annotation entry for this image
                 an = {
                     "id": annotation['id'],
                     "image_id": annotation['image_id'],
@@ -105,6 +125,3 @@ def crop_image_to_bbox():
                     print(cls_coco)
 
 crop_image_to_bbox()
-
-#add counter to id so that they re unique
-# remember to add categories to the json file
