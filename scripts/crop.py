@@ -102,6 +102,9 @@ def crop_image_to_bbox():
                 cls_coco_path = '/home/jess/ct_classifier_wd/data/intermediate/cls_coco.json'
                 with open(cls_coco_path, 'w') as file:
                     json.dump(cls_coco, file)
-                    print('cls_coco')
+                    print(cls_coco)
 
 crop_image_to_bbox()
+
+#add counter to id so that they re unique
+# remember to add categories to the json file
