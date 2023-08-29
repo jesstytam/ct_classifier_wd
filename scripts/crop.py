@@ -1,8 +1,9 @@
 import json
 from PIL import Image
 import os
+from pathlib import Path
 
-def crop_image_to_bbox(dataset):
+def crop_image_to_bbox():
 
     labels_list = {
         0: {'label': 'Red Kangaroo'},
@@ -22,8 +23,14 @@ def crop_image_to_bbox(dataset):
         14: {'label': 'Goat'}
     }
 
-    coco_annotation_file = '/home/jess/ct_classifier_wd/data/processed/' + dataset + '_coco.json'
+    coco_annotation_file = '/home/jess/ct_classifier_wd/data/intermediate/coco.json'
     coco = json.load(open(coco_annotation_file))
+
+    cls_coco = {
+        "images": [],
+        "categories": [],
+        "annotations": []
+    }
 
     for annotation in coco['annotations']:
 
@@ -36,6 +43,7 @@ def crop_image_to_bbox(dataset):
 
             if annotation['category_id']==species:
 
+                #GET IMAGE CROP
                 try: 
 
                     # crop the images
@@ -69,10 +77,31 @@ def crop_image_to_bbox(dataset):
                 except FileNotFoundError:
                     pass
 
-            print('Images for ', sp, ' saved!')
+                #GET ANNOTATION
+                im = Image.open(img2_path)
+                width, height = im.size
 
-        print(dataset, ' images processing done!')
+                cls_coco["images"].append({
+                    "file_name": f'{sp}/{Path(img2_path).name}',
+                    "height": height,
+                    "width": width,
+                    "id": annotation['image_id']
+                })
 
-crop_image_to_bbox('train')
-crop_image_to_bbox('val')
-crop_image_to_bbox('test')
+                # Create annotation entry for this image
+                an = {
+                    "id": annotation['id'],
+                    "image_id": annotation['image_id'],
+                    "category_id": annotation['category_id'],
+                    "iscrowd": 0,
+                    "segmentation": [],
+                    "area": width * height
+                }
+                cls_coco["annotations"].append(an)
+
+                cls_coco_path = '/home/jess/ct_classifier_wd/data/intermediate/cls_coco.json'
+                with open(cls_coco_path, 'w') as file:
+                    json.dump(cls_coco, file)
+                    print('cls_coco')
+
+crop_image_to_bbox()
