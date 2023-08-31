@@ -21,6 +21,8 @@ from util import init_seed
 from dataset import CTDataset
 from model import CustomResNet18
 
+import wandb
+
 
 
 def create_dataloader(cfg, split='train'):
@@ -233,6 +235,12 @@ def main():
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
 
+    config = {
+        "project": "project_name",
+        "num_of_classes": 15
+    }
+    run = wandb.init(project = config["project"], config = cfg)
+
     # init random number generator seed (set at the start)
     init_seed(cfg.get('seed', None))
 
@@ -269,6 +277,8 @@ def main():
             'oa_val': oa_val
         }
         save_model(cfg, current_epoch, model, stats)
+
+        wandb.log(stats)
     
 
     # That's all, folks!

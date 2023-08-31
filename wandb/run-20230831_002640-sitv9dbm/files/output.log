@@ -1,0 +1,63 @@
+Starting new model
+Epoch 1/100
+
+
+
+
+
+
+[Train] Loss: 1.22; OA: 63.27%: 100%|█████████| 323/323 [00:15<00:00, 20.83it/s]
+
+[Val ] Loss: 1.03; OA: 70.97%:  97%|███████████▋| 75/77 [00:01<00:00, 50.58it/s]
+[Val ] Loss: 1.03; OA: 71.12%: 100%|████████████| 77/77 [00:02<00:00, 29.78it/s]
+
+
+
+
+
+
+[Train] Loss: 0.81; OA: 75.75%: 100%|█████████| 323/323 [00:13<00:00, 23.12it/s]
+[Val ] Loss: 0.89; OA: 71.57%:  79%|█████████▌  | 61/77 [00:01<00:00, 50.80it/s]
+[Val ] Loss: 0.89; OA: 71.93%: 100%|████████████| 77/77 [00:01<00:00, 39.48it/s]
+
+
+
+
+
+[Train] Loss: 0.66; OA: 80.71%: 100%|█████████| 323/323 [00:13<00:00, 24.33it/s]
+[Val ] Loss: 0.85; OA: 70.41%: 100%|████████████| 77/77 [00:02<00:00, 37.64it/s]
+  0%|                                                   | 0/323 [00:00<?, ?it/s]
+
+
+
+
+
+
+[Train] Loss: 0.58; OA: 82.62%: 100%|█████████| 323/323 [00:13<00:00, 24.19it/s]
+[Val ] Loss: 0.86; OA: 67.07%: 100%|████████████| 77/77 [00:01<00:00, 40.39it/s]
+[Train] Loss: 0.48; OA: 86.31%:   6%|▌         | 20/323 [00:01<00:12, 24.22it/s]
+
+
+
+
+
+[Train] Loss: 0.52; OA: 83.79%: 100%|█████████| 323/323 [00:12<00:00, 25.48it/s]
+[Val ] Loss: 0.86; OA: 66.06%: 100%|████████████| 77/77 [00:01<00:00, 38.78it/s]
+[Train] Loss: 0.35; OA: 89.06%:   1%|▏          | 4/323 [00:00<00:33,  9.48it/s]
+
+
+
+
+
+[Train] Loss: 0.49; OA: 84.76%:  82%|███████▍ | 266/323 [00:10<00:02, 25.57it/s]Traceback (most recent call last):
+  File "/home/jess/ct_classifier_wd/ct_classifier/train.py", line 289, in <module>
+    # This block only gets executed if you call the "train.py" script directly
+  File "/home/jess/ct_classifier_wd/ct_classifier/train.py", line 269, in main
+    loss_train, oa_train = train(cfg, dl_train, model, optim)
+  File "/home/jess/ct_classifier_wd/ct_classifier/train.py", line 140, in train
+    loss.backward()
+  File "/home/jess/miniconda3/envs/classifier/lib/python3.9/site-packages/torch/tensor.py", line 245, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+  File "/home/jess/miniconda3/envs/classifier/lib/python3.9/site-packages/torch/autograd/__init__.py", line 145, in backward
+    Variable._execution_engine.run_backward(
+KeyboardInterrupt
