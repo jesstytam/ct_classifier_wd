@@ -15,13 +15,18 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import SGD
+from torchvision import transforms
+
+import json
+from PIL import Image, ImageDraw, ImageFont
+import wandb
 
 # let's import our own classes and functions!
 from util import init_seed
 from dataset import CTDataset
 from model import CustomResNet18
 
-import wandb
+
 
 
 
@@ -39,6 +44,68 @@ def create_dataloader(cfg, split='train'):
             num_workers=cfg['num_workers']
         )
     return dataLoader
+
+
+
+# for logging best model through epochs
+def save_best_model(model, filename):
+    torch.save(model.state_dict(), filename)
+
+
+
+# def log_images_from_coco_json(json_path, folder_prefix, num_images_to_log=10):
+#     with open(json_path, "r") as f:
+#         coco_data = json.load(f)
+        
+#         image_paths = [item["file_name"] for item in coco_data["images"]]
+    
+#     for path in image_paths[:num_images_to_log]:
+#         experiment.log_image(path, name=f"{folder_prefix}/{path.split('/')[-1]}")
+        
+
+
+def overlay_labels_on_image(image_path, ground_truth, prediction):
+    # Open an image file
+    image = Image.open(image_path)
+    # Prepare to draw on the image
+    draw = ImageDraw.Draw(image)
+    
+    # Specify font size and color
+    font = ImageFont.load_default() 
+    #font = ImageFont.truetype("Ubuntu-R.ttf", size=25)  # you might need a different font file
+    color = "red"
+    
+    # Draw ground truth and prediction on the image
+    draw.text((10, 10), f"Ground Truth: {ground_truth}", fill=color, font=font)
+    draw.text((10, 40), f"Prediction: {prediction}", fill=color, font=font)
+    
+    # Save the modified image or return it
+    # image.save("output_path.jpg")  # if you want to save
+    return image
+
+
+
+def draw_label_on_image(image, label, position=(10, 10)):
+    """
+    Draw a label on an image using PIL.
+    
+    image: PIL Image object.
+    label: Text to display on the image.
+    position: Tuple indicating where to start the text.
+    
+    Returns a new image with the label.
+    """
+    # If the image is not a PIL Image, convert it
+    if not isinstance(image, Image.Image):
+        image = transforms.ToPILImage()(image)
+        
+    draw = ImageDraw.Draw(image)
+    
+    # Use a basic font. For custom fonts, you might need to use ImageFont.truetype
+    font = ImageFont.load_default()
+    
+    draw.text(position, label, (255, 255, 255), font=font)
+    return image
 
 
 
@@ -77,7 +144,12 @@ def save_model(cfg, epoch, model, stats):
     stats['model'] = model.state_dict()
 
     # ...and save
-    torch.save(stats, open(f'model_states/{epoch}.pt', 'wb'))
+    counter = 1
+    path_to_save = f'model_states/trial_{counter}/{epoch}.pt'
+    while os.path.exists(path_to_save):
+        path_to_save = f'model_states/trial_{counter}/{epoch}.pt'
+        counter += 1
+    torch.save(stats, open(path_to_save, 'wb'))
     
     # also save config file if not present
     cfpath = 'model_states/config.yaml'
@@ -224,6 +296,25 @@ def validate(cfg, dataLoader, model):
 
 
 
+class EarlyStopper:
+    def __init__(self, patience=1, min_delta=0):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.min_validation_loss = np.inf
+
+    def early_stop(self, validation_loss):
+        if validation_loss < self.min_validation_loss:
+            self.min_validation_loss = validation_loss
+            self.counter = 0
+        elif validation_loss > (self.min_validation_loss + self.min_delta):
+            self.counter += 1
+            if self.counter >= self.patience:
+                return True
+        return False
+    
+
+
 def main():
 
     # Argument parser for command-line arguments:
@@ -263,6 +354,8 @@ def main():
 
     # we have everything now: data loaders, model, optimizer; let's do the epochs!
     numEpochs = cfg['num_epochs']
+    early_stopper = EarlyStopper(patience=10, min_delta=10)
+
     while current_epoch < numEpochs:
         current_epoch += 1
         print(f'Epoch {current_epoch}/{numEpochs}')
@@ -280,6 +373,9 @@ def main():
         save_model(cfg, current_epoch, model, stats)
 
         wandb.log(stats)
+        
+        if early_stopper.early_stop(loss_val):             
+            break
     
 
     # That's all, folks!

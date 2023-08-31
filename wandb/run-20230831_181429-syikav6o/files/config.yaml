@@ -1,0 +1,59 @@
+wandb_version: 1
+
+seed:
+  desc: null
+  value: 32678456782
+device:
+  desc: null
+  value: cuda
+num_workers:
+  desc: null
+  value: 4
+data_root:
+  desc: null
+  value: /home/jess/data/wild_deserts/processed/crops
+num_classes:
+  desc: null
+  value: 15
+image_size:
+  desc: null
+  value:
+  - 224
+  - 224
+num_epochs:
+  desc: null
+  value: 100
+batch_size:
+  desc: null
+  value: 32
+learning_rate:
+  desc: null
+  value: 0.001
+weight_decay:
+  desc: null
+  value: 0.001
+_wandb:
+  desc: null
+  value:
+    python_version: 3.9.17
+    cli_version: 0.15.9
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1693505669.190325
+    t:
+      1:
+      - 1
+      - 41
+      - 55
+      2:
+      - 1
+      - 41
+      - 55
+      3:
+      - 16
+      - 23
+      4: 3.9.17
+      5: 0.15.9
+      8:
+      - 5
