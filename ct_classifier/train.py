@@ -170,6 +170,7 @@ def validate(cfg, dataLoader, model):
     '''
         Validation function. Note that this looks almost the same as the training
         function, except that we don't use any optimizer or gradient steps.
+        Add metrics here, e.g. precision, recall, etc.
     '''
     
     device = cfg['device']
