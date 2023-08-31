@@ -19,6 +19,7 @@ from torchvision import transforms
 
 import json
 from PIL import Image, ImageDraw, ImageFont
+import numpy as np
 import wandb
 
 # let's import our own classes and functions!
@@ -138,13 +139,12 @@ def load_model(cfg):
 
 def save_model(cfg, epoch, model, stats):
     # make sure save directory exists; create if not
-    os.makedirs('model_states', exist_ok=True)
-
+    counter = 1
+    os.makedirs(f'model_states/trial_{counter}', exist_ok=True)
     # get model parameters and add to stats...
     stats['model'] = model.state_dict()
 
     # ...and save
-    counter = 1
     path_to_save = f'model_states/trial_{counter}/{epoch}.pt'
     while os.path.exists(path_to_save):
         path_to_save = f'model_states/trial_{counter}/{epoch}.pt'
@@ -328,7 +328,7 @@ def main():
     cfg = yaml.safe_load(open(args.config, 'r'))
 
     config = {
-        "project": "project_name",
+        "project": "classifier",
         "num_of_classes": 15
     }
     run = wandb.init(project = config["project"], config = cfg)
