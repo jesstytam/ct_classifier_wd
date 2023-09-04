@@ -354,7 +354,7 @@ def main():
 
     # we have everything now: data loaders, model, optimizer; let's do the epochs!
     numEpochs = cfg['num_epochs']
-    early_stopper = EarlyStopper(patience=10, min_delta=10)
+    early_stopper = EarlyStopper(patience=10, min_delta=0.1)
 
     while current_epoch < numEpochs:
         current_epoch += 1
